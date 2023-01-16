@@ -1,0 +1,9 @@
+#! /bin/bash
+PASSWORD=$1
+now=$(date +%s)
+#backup sql
+mysqldump -u root -p${PASSWORD} --all-databases > ${now}hello.sql
+#backup code
+zip -r ${now}html.zip /var/www/linux.com/
+
+

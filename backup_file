@@ -1,0 +1,4 @@
+* 0 * * * /bin/bash back_up 
+* * * * * grep /var/log/nginx/access.log > /var/www/linux.com/log
+
+#phut gio ngay (thang) tuan

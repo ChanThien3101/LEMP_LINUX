@@ -1,0 +1,62 @@
+#!/bin/bash
+PASSWORD=$1
+SERVICE_STATUS_NGINX=$(service nginx status)
+SERVICE_STATUS_MYSQL=$(service mysql status)
+
+HEIGHT=25
+WEIGHT=80
+ROW_OPTION=3
+
+# get ip 
+IP_IN_HOST=$(hostname -I)
+#set access log
+SUB_DOMAIN_LOG_OF_ACCESS_WEBSITE=$(./ip_access_log $IP_IN_HOST)
+RESULT_IP_ACCESS=$(cat TMP)
+rm TMP
+#set access phpmyadmin
+SUB_DOMAIN_LOG_OF_ACCESS_PHPMYADMIN=$(./ip_acc_phpmyadmin $IP_IN_HOST)
+RESULT_IP_ACCESS_PHPMYADMIN=$(cat TMP)
+rm TMP
+clear
+
+
+if [[ $SERVICE_STATUS_NGINX == *"active (running)"* ]]; then
+    SERVICE_STATUS_NGINX="active (running)"
+else 
+    SERVICE_STATUS_NGINX="inactive (dead)"
+fi
+
+if [[ $SERVICE_STATUS_MYSQL == *"active (running)"* ]]; then
+    SERVICE_STATUS_MYSQL="active (running)"
+else 
+    SERVICE_STATUS_MYSQL="inactive (dead)"
+fi
+
+OPTION=$(whiptail --title "Status LEMPP" --menu "NGINX $SERVICE_STATUS_NGINX \nMYSQL $SERVICE_STATUS_MYSQL \
+    \nAccess Log\n$RESULT_IP_ACCESS\
+    \nManage Mysql\n$RESULT_IP_ACCESS_PHPMYADMIN\
+    \nRun Command: code to run vscode" \
+    $HEIGHT $WEIGHT $ROW_OPTION \
+    "1" "STOP" \
+    "2" "START" \
+    "3"  "REMOVE" 3>&1 1>&2 2>&3)
+
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+    # echo "Your chosen option:" $OPTION
+    case $OPTION in
+        1)
+            service nginx stop
+            service mysql stop
+            ;; 
+        2) 
+            service nginx start
+            service mysql start
+            ;;
+        3)
+            ./remove $PASSWORD
+            ;;
+    esac
+else
+    clear
+fi

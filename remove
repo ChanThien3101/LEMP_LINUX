@@ -1,0 +1,21 @@
+#! /bin/bash
+PASSWORD=$1
+#remove phpmyadmin
+apt -y purge phpmyadmin
+rm -r /var/lib/phpmyadmin
+#rm -r /var/www/html/www
+#remove mysql
+mysql -u root -p${PASSWORD} -e "DROP DATABASE databasename dblinux"
+mysql -u root -p${PASSWORD} -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';"
+service mysql stop
+apt -y --purge mysql*
+apt -y purge mysql*
+apt remove dbconfig-mysql
+#remove nginx
+service nginx stop
+apt -y purge nginx
+#remove php
+apt -y purge php*
+#clear 
+apt -y autoremove
+apt -y autoclean

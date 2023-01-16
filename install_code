@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cp -r CodeWeb/app /var/www/linux.com
+cp -r CodeWeb/system /var/www/linux.com
+cp -r CodeWeb/public /var/www/linux.com
+cp -r CodeWeb/index.php /var/www/linux.com
+cp -r CodeWeb/.buildpath /var/www/linux.com
+cp -r CodeWeb/.htaccess /var/www/linux.com
+cp -r CodeWeb/.project /var/www/linux.com
+chmod -R 777 /var/www

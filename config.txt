@@ -1,0 +1,58 @@
+#!/bin/sh
+
+#Tạo thư mục web gốc cho domain như sau:
+sudo mkdir /var/www/linux.com
+
+#chỉ định quyền sở hữu thư mục với biến môi trường $USER, sẽ tham chiếu người dùng hệ thống hiện tại của bạn:
+sudo chown -R $USER:$USER /var/www/linux.com
+#chinh sua tệp cấu hình mới trong thư mục của Nginx sites-available 
+
+sudo nano /etc/nginx/sites-available/linux.com
+
+#dan thong tin ben duoi vao:
+
+server {
+listen 80;
+    server_name linux.com www.linux.com;
+    root /var/www/linux.com;
+
+    index index.php index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+     }
+
+    location ~ /\.ht {
+        deny all;
+    }
+    
+    location /phpmyadmin {
+    	root /usr/share/;
+    	index index.php;
+    	try_files $uri $uri/ =404;
+
+	location ~ ^/phpmyadmin/(doc|sql|setup)/ {
+    		deny all;
+    		}
+
+	location ~ /phpmyadmin/(.+\.php)$ {
+    		fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+    		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    		include fastcgi_params;
+    		include snippets/fastcgi-php.conf;
+    		}
+	}
+}
+ #Kích hoạt cấu hình của bạn bằng cách liên kết đến tệp cấu hình từ thư mục của Nginx sites-enabled:
+sudo ln -s /etc/nginx/sites-available/linux.com /etc/nginx/sites-enabled/
+
+#hủy liên kết tệp cấu hình mặc định khỏi thư mục /sites-enabled/:
+sudo unlink /etc/nginx/sites-enabled/default
+
+
+systemctl reload nginx

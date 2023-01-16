@@ -1,0 +1,57 @@
+#!/bin/bash
+
+
+apt-get update;
+apt-get install -y fail2ban ufw;
+apt install ufw -y;
+ufw enable
+
+# And lastly we activate UFW
+ufw --force enable
+
+
+#install nginx
+apt install nginx -y
+systemctl enable nginx
+systemctl start nginx
+iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+ufw allow 'Nginx HTTP'
+
+#Install MySQL and set a strong root password
+
+apt-get install -y mysql-client mysql-server;
+
+#Secure your Mysql installation
+
+MYSQL_ROOT_PASSWORD=$1
+WP_PASSWORD=$2
+
+while [ "$MYSQL_ROOT_PASSWORD" = "" ]
+do
+        echo "Please provide your MYSQL_ROOT_PASSWORD:"
+        read MYSQL_ROOT_PASSWORD
+done
+
+if [ "$WP_PASSWORD" = "" ]; then
+        WP_PASSWORD=$MYSQL_ROOT_PASSWORD
+fi
+mysql -uroot <<MYSQL_SCRIPT
+CREATE DATABASE dblinux;
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+MYSQL_SCRIPT
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';"
+mysql -u root -p${MYSQL_ROOT_PASSWORD} dblinux < CodeWeb/php_mvc_pdo_techstore.sql
+echo $MYSQL_ROOT_PASSWORD
+
+#install php7.4
+apt install -y php7.4 php7.4-fpm php7.4-mysql php-common php7.4-cli php7.4-common php7.4-json php7.4-opcache php7.4-readline php7.4-mbstring php7.4-xml php7.4-gd php7.4-curl
+systemctl enable php7.4-fpm
+systemctl start php7.4-fpm
+
+#install phpmyadmin
+apt install phpmyadmin -y
+
